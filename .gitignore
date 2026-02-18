@@ -4,3 +4,6 @@ out
 *.log
 .env*
 .DS_Store
+.corepack
+.yarn/install-state.gz
+package-lock.json

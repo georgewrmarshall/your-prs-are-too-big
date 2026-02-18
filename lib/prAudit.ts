@@ -94,7 +94,7 @@ export async function runPullRequestAudit(username: string): Promise<AuditResult
   }
 
   const searchUrl = new URL("https://api.github.com/search/issues");
-  searchUrl.searchParams.set("q", `author:${trimmed} type:pr is:public`);
+  searchUrl.searchParams.set("q", `author:${trimmed} type:pr is:public is:merged`);
   searchUrl.searchParams.set("sort", "updated");
   searchUrl.searchParams.set("order", "desc");
   searchUrl.searchParams.set("per_page", "30");
@@ -153,7 +153,7 @@ export async function runPullRequestAudit(username: string): Promise<AuditResult
         mergedAt: pr.merged_at
       };
     })
-    .filter((pr) => pr.linesChanged > 0);
+    .filter((pr) => pr.linesChanged > 0 && Boolean(pr.mergedAt));
 
   if (!summaries.length) {
     throw new Error("No measurable PR size data found.");
@@ -185,8 +185,8 @@ export async function runPullRequestAudit(username: string): Promise<AuditResult
   const tooBig = averageSize > 300 || veryLargeRatio >= 0.2 || largeRatio >= 0.4;
 
   const reason = tooBig
-    ? "Your recent PR history skews large. Break changes into smaller reviewable chunks."
-    : "Your recent PR history is mostly in reviewer-friendly sizes.";
+    ? "Your PRs read like a jump-scare novel. Split them up before your reviewers file a missing-person report."
+    : "Nice. Your PRs are compact, readable, and only mildly terrifying to reviewers.";
 
   return {
     username: trimmed,

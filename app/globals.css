@@ -1,188 +1,42 @@
-:root {
-  --bg-top: #fff3c7;
-  --bg-bottom: #ffc0a8;
-  --panel: #fff8e9;
-  --ink: #111111;
-  --accent: #de4d2f;
-  --accent-2: #ff7f50;
-  --ok: #2f8f2f;
-  --warn: #8d2b16;
+@import url("https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;700;800;900&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Work Sans", "Avenir Next", "Segoe UI", sans-serif;
+  /* Image palette mapped to OKLCH (approx): #FCFCFC and #FF495C */
+  --color-bg-top: oklch(0.99 0.002 106);
+  --color-bg-bottom: oklch(0.67 0.225 19);
+  --color-panel: oklch(0.985 0.003 106);
+  --color-ink: oklch(0.18 0 0);
+  --color-accent: oklch(0.67 0.225 19);
+  --color-ok: oklch(0.62 0.15 145);
+  --color-warn: oklch(0.58 0.21 20);
+  --animate-card-in: card-in 420ms ease-out both;
+  --animate-warning-pop: warning-pop 360ms ease-out;
 }
 
-* {
-  box-sizing: border-box;
-}
+@layer base {
+  html,
+  body {
+    min-height: 100%;
+  }
 
-html,
-body {
-  margin: 0;
-  padding: 0;
-  min-height: 100%;
-  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
-  color: var(--ink);
-}
+  body {
+    font-family: var(--font-display);
+    color: var(--color-ink);
+    background:
+      radial-gradient(circle at 10% 10%, oklch(0.99 0.002 106), transparent 40%),
+      radial-gradient(circle at 90% 80%, oklch(0.72 0.18 22), transparent 45%),
+      linear-gradient(165deg, var(--color-bg-top), var(--color-bg-bottom));
+  }
 
-body {
-  background: radial-gradient(circle at 10% 10%, #ffe87f, transparent 40%),
-    radial-gradient(circle at 90% 80%, #ff9a62, transparent 45%),
-    linear-gradient(165deg, var(--bg-top), var(--bg-bottom));
-}
-
-main {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 24px;
-}
-
-.card {
-  width: min(850px, 100%);
-  background: color-mix(in hsl, var(--panel) 88%, white 12%);
-  border: 2px solid #000;
-  border-radius: 20px;
-  padding: 24px;
-  box-shadow: 8px 8px 0 #000;
-  animation: card-in 420ms ease-out both;
-}
-
-h1 {
-  margin: 0;
-  font-size: clamp(1.9rem, 4vw, 3.1rem);
-  line-height: 1;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-h1.too-big {
-  color: var(--warn);
-  font-size: clamp(2.2rem, 7vw, 5rem);
-  animation: warning-pop 360ms ease-out;
-}
-
-.subtitle {
-  margin-top: 8px;
-  margin-bottom: 22px;
-  font-size: 1rem;
-}
-
-.form-row {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-input,
-button {
-  font: inherit;
-  border-radius: 999px;
-  border: 2px solid #000;
-}
-
-input {
-  flex: 1 1 260px;
-  padding: 12px 16px;
-  background: #fff;
-}
-
-button {
-  padding: 12px 22px;
-  background: var(--accent);
-  color: #fff;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.meta {
-  margin-top: 20px;
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.pill {
-  border: 2px solid #000;
-  border-radius: 999px;
-  padding: 6px 12px;
-  background: #fff;
-}
-
-.bucket-grid {
-  margin-top: 20px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 10px;
-}
-
-.bucket {
-  border: 2px solid #000;
-  border-radius: 12px;
-  padding: 12px;
-  background: #fff;
-  animation: card-in 460ms ease-out both;
-}
-
-.bucket strong {
-  display: block;
-  font-size: 1.2rem;
-}
-
-.message {
-  margin-top: 18px;
-  font-weight: 600;
-}
-
-.message.good {
-  color: var(--ok);
-}
-
-.message.bad {
-  color: var(--warn);
-}
-
-.error {
-  margin-top: 12px;
-  color: #8a0d0d;
-  font-weight: 600;
-}
-
-.pr-list {
-  margin-top: 22px;
-  max-height: 240px;
-  overflow: auto;
-  border: 2px solid #000;
-  border-radius: 12px;
-  padding: 8px;
-  background: #fff;
-}
-
-.pr-row {
-  padding: 8px;
-  border-radius: 8px;
-}
-
-.pr-row + .pr-row {
-  border-top: 1px solid #d8d8d8;
-}
-
-.pr-row a {
-  color: var(--ink);
-  font-weight: 600;
-}
-
-.pr-small {
-  font-size: 0.92rem;
-  color: #333;
-}
-
-@media (max-width: 640px) {
-  .card {
-    padding: 18px;
-    border-radius: 14px;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 800;
   }
 }
 
