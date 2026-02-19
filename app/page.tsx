@@ -1,7 +1,12 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
-import { bucketLabels, runPullRequestAudit, type AuditResult, type Bucket } from "@/lib/prAudit";
+import {
+  bucketLabels,
+  runPullRequestAudit,
+  type AuditResult,
+  type Bucket,
+} from "@/lib/prAudit";
 
 const orderedBuckets: Bucket[] = ["xs", "sm", "md", "lg", "xl"];
 
@@ -9,7 +14,7 @@ function prettyDate(isoDate: string): string {
   return new Date(isoDate).toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
-    day: "numeric"
+    day: "numeric",
   });
 }
 
@@ -37,7 +42,9 @@ export default function HomePage() {
       const result = await runPullRequestAudit(username);
       setAudit(result);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Something went wrong.");
+      setError(
+        caught instanceof Error ? caught.message : "Something went wrong.",
+      );
     } finally {
       setLoading(false);
     }
@@ -47,7 +54,7 @@ export default function HomePage() {
     ? audit.verdict === "too-big"
       ? "YOUR PRS ARE TOO BIG"
       : "YOUR PRS AREN'T TOO BIG"
-    : "Are your PRs reviewable?";
+    : "Are your PRs to big?";
 
   return (
     <main className="grid min-h-screen place-items-center p-6">
@@ -58,8 +65,9 @@ export default function HomePage() {
           {heading}
         </h1>
         <p className="mt-2 mb-6 text-base">
-          Type a GitHub username. We inspect recent public PRs in MetaMask Extension and Mobile
-          and judge whether your code habits are disciplined or absolute chaos.
+          Type a GitHub username. We inspect recent public PRs in MetaMask
+          Extension and Mobile and judge whether your code habits are
+          disciplined or absolute chaos.
         </p>
 
         <form className="flex flex-wrap gap-3" onSubmit={onSubmit}>
@@ -80,14 +88,22 @@ export default function HomePage() {
           </button>
         </form>
 
-        {error ? <div className="mt-3 font-semibold text-warn">{error}</div> : null}
+        {error ? (
+          <div className="mt-3 font-semibold text-warn">{error}</div>
+        ) : null}
 
         {audit ? (
           <>
             <div className="mt-5 flex flex-wrap gap-3">
-              <span className="rounded-full border-2 border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">User: @{audit.username}</span>
-              <span className="rounded-full border-2 border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">Scope: Extension + Mobile</span>
-              <span className="rounded-full border-2 border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">PRs audited: {audit.totalPrs}</span>
+              <span className="rounded-full border-2 border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">
+                User: @{audit.username}
+              </span>
+              <span className="rounded-full border-2 border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">
+                Scope: Extension + Mobile
+              </span>
+              <span className="rounded-full border-2 border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">
+                PRs audited: {audit.totalPrs}
+              </span>
               <span className="rounded-full border-2 border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">
                 Average changed lines (est.): {audit.averageSize}
               </span>
@@ -100,7 +116,9 @@ export default function HomePage() {
                   key={bucket}
                 >
                   <span>{bucketLabels[bucket]}</span>
-                  <strong className="block text-[1.2rem]">{audit.buckets[bucket]}</strong>
+                  <strong className="block text-[1.2rem]">
+                    {audit.buckets[bucket]}
+                  </strong>
                 </div>
               ))}
             </div>
@@ -114,12 +132,21 @@ export default function HomePage() {
             <div className="mt-6 overflow-hidden rounded-xl border-2 border-[var(--color-border)] bg-[var(--color-surface)]">
               <div className="pr-list-scroll max-h-[240px] overflow-auto p-2 pr-1">
                 {audit.prs.slice(0, 20).map((pr) => (
-                  <article className="rounded-lg border-t border-t-[var(--color-border)] p-2 first:border-t-0" key={pr.url}>
-                    <a className="font-semibold text-ink" href={pr.url} target="_blank" rel="noreferrer">
+                  <article
+                    className="rounded-lg border-t border-t-[var(--color-border)] p-2 first:border-t-0"
+                    key={pr.url}
+                  >
+                    <a
+                      className="font-semibold text-ink"
+                      href={pr.url}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
                       {pr.title}
                     </a>
                     <div className="text-sm text-[var(--color-muted)]">
-                      {pr.repository} • {pr.linesChanged} lines • {prettyDate(pr.createdAt)}
+                      {pr.repository} • {pr.linesChanged} lines •{" "}
+                      {prettyDate(pr.createdAt)}
                     </div>
                   </article>
                 ))}
