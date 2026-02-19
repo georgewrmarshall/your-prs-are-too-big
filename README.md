@@ -23,7 +23,9 @@ Then open `http://localhost:3000`.
   - `md`: 101-500
   - `lg`: 501-1000
   - `xl`: 1001+
-- The app flags `YOUR PRS ARE TOO BIG` when `xl > (xs + sm + md + lg)`.
+- The app flags `YOUR PRS ARE TOO BIG` when either:
+  - `xl / totalPRs >= 0.15` (15% or more XL PRs), or
+  - `(lg + xl) / totalPRs >= 0.4` (40% or more large+ PRs).
 - The "Average changed lines" value is estimated from bucket midpoints.
 
 ## GitHub Pages
