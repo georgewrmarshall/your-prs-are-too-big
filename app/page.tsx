@@ -58,8 +58,8 @@ export default function HomePage() {
           {heading}
         </h1>
         <p className="mt-2 mb-6 text-base">
-          Type a GitHub username. We inspect recent public PRs in MetaMask repositories and judge
-          whether your code habits are disciplined or absolute chaos.
+          Type a GitHub username. We inspect recent public PRs in MetaMask Extension and Mobile
+          and judge whether your code habits are disciplined or absolute chaos.
         </p>
 
         <form className="flex flex-wrap gap-3" onSubmit={onSubmit}>
@@ -86,7 +86,7 @@ export default function HomePage() {
           <>
             <div className="mt-5 flex flex-wrap gap-3">
               <span className="rounded-full border-2 border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">User: @{audit.username}</span>
-              <span className="rounded-full border-2 border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">Scope: MetaMask org</span>
+              <span className="rounded-full border-2 border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">Scope: Extension + Mobile</span>
               <span className="rounded-full border-2 border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">PRs audited: {audit.totalPrs}</span>
               <span className="rounded-full border-2 border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">
                 Average changed lines (est.): {audit.averageSize}
