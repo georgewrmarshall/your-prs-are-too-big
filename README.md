@@ -16,13 +16,15 @@ Then open `http://localhost:3000`.
 
 - Enter a GitHub username.
 - The app fetches recent public PRs for that user via GitHub REST APIs.
-- Each PR is bucketed by changed lines (`additions + deletions`):
+- In free/no-login mode, PRs are bucketed using existing PR labels (`size-XS` to `size-XL`).
+- Buckets follow the MetaMask thresholds:
   - `xs`: 1-10
   - `sm`: 11-100
   - `md`: 101-500
   - `lg`: 501-1000
   - `xl`: 1001+
 - The app flags `YOUR PRS ARE TOO BIG` when `xl > (xs + sm + md + lg)`.
+- The "Average changed lines" value is estimated from bucket midpoints.
 
 ## GitHub Pages
 
@@ -33,4 +35,5 @@ Then open `http://localhost:3000`.
 ## Notes
 
 - This uses unauthenticated GitHub API calls and can hit rate limits.
+- This mode relies on PR size labels. PRs without size labels are ignored.
 - Only public pull requests are analyzed.

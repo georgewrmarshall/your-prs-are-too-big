@@ -20,22 +20,15 @@ export type AuditResult = {
 };
 
 type SearchItem = {
-  pull_request?: {
-    url: string;
-  };
-};
-
-type PullRequestResponse = {
   title: string;
   html_url: string;
-  additions: number;
-  deletions: number;
+  repository_url: string;
   created_at: string;
-  merged_at: string | null;
-  base: {
-    repo: {
-      full_name: string;
-    };
+  labels?: Array<{
+    name: string;
+  }>;
+  pull_request?: {
+    url: string;
   };
 };
 
@@ -63,25 +56,43 @@ function bucketForSize(linesChanged: number): Bucket {
   return "xl";
 }
 
-async function mapWithConcurrency<T, R>(
-  items: T[],
-  limit: number,
-  mapper: (item: T) => Promise<R>
-): Promise<R[]> {
-  const results: R[] = [];
-  let nextIndex = 0;
+const META_MASK_SIZE_LABEL_TO_BUCKET: Record<string, Bucket> = {
+  "size-xs": "xs",
+  "size-s": "sm",
+  "size-m": "md",
+  "size-l": "lg",
+  "size-xl": "xl"
+};
 
-  async function worker(): Promise<void> {
-    while (nextIndex < items.length) {
-      const index = nextIndex;
-      nextIndex += 1;
-      results[index] = await mapper(items[index]);
-    }
+const BUCKET_ESTIMATED_LINES: Record<Bucket, number> = {
+  xs: 5,
+  sm: 55,
+  md: 300,
+  lg: 750,
+  xl: 1250
+};
+
+function bucketFromLabels(labels: Array<{ name: string }> | undefined): Bucket | null {
+  if (!labels?.length) return null;
+  for (const label of labels) {
+    const normalized = label.name.trim().toLowerCase();
+    const bucket = META_MASK_SIZE_LABEL_TO_BUCKET[normalized];
+    if (bucket) return bucket;
   }
+  return null;
+}
 
-  const workers = Array.from({ length: Math.min(limit, items.length) }, () => worker());
-  await Promise.all(workers);
-  return results;
+function repoFromUrl(repositoryUrl: string): string {
+  try {
+    const url = new URL(repositoryUrl);
+    const parts = url.pathname.split("/").filter(Boolean);
+    if (parts.length >= 2) {
+      return `${parts[0]}/${parts[1]}`;
+    }
+  } catch {
+    // Fall back when URL parsing fails.
+  }
+  return repositoryUrl;
 }
 
 export async function runPullRequestAudit(username: string): Promise<AuditResult> {
@@ -94,7 +105,7 @@ export async function runPullRequestAudit(username: string): Promise<AuditResult
   searchUrl.searchParams.set("q", `author:${trimmed} type:pr is:public is:merged`);
   searchUrl.searchParams.set("sort", "updated");
   searchUrl.searchParams.set("order", "desc");
-  searchUrl.searchParams.set("per_page", "30");
+  searchUrl.searchParams.set("per_page", "100");
 
   const searchResponse = await fetch(searchUrl.toString(), {
     headers: {
@@ -113,47 +124,30 @@ export async function runPullRequestAudit(username: string): Promise<AuditResult
   }
 
   const searchData = (await searchResponse.json()) as { items: SearchItem[] };
-  const prDetailUrls = searchData.items
-    .map((item) => item.pull_request?.url)
-    .filter((url): url is string => Boolean(url));
-
-  if (!prDetailUrls.length) {
+  const candidateItems = searchData.items.filter((item) => Boolean(item.pull_request?.url));
+  if (!candidateItems.length) {
     throw new Error("No public PRs found for this username.");
   }
 
-  const prDetails = await mapWithConcurrency(prDetailUrls, 8, async (detailUrl) => {
-    const prResponse = await fetch(detailUrl, {
-      headers: {
-        Accept: "application/vnd.github+json"
-      }
-    });
+  const summaries = candidateItems.reduce<PullRequestSummary[]>((acc, item) => {
+      const bucket = bucketFromLabels(item.labels);
+      if (!bucket) return acc;
 
-    if (!prResponse.ok) {
-      if (prResponse.status === 403) {
-        throw new Error("GitHub rate limit hit while reading PR details.");
-      }
-      throw new Error("Failed while loading PR details.");
-    }
-
-    return (await prResponse.json()) as PullRequestResponse;
-  });
-
-  const summaries: PullRequestSummary[] = prDetails
-    .map((pr) => {
-      const linesChanged = pr.additions + pr.deletions;
-      return {
-        title: pr.title,
-        url: pr.html_url,
-        repository: pr.base.repo.full_name,
-        linesChanged,
-        createdAt: pr.created_at,
-        mergedAt: pr.merged_at
-      };
-    })
-    .filter((pr) => pr.linesChanged > 0 && Boolean(pr.mergedAt));
+      acc.push({
+        title: item.title,
+        url: item.html_url,
+        repository: repoFromUrl(item.repository_url),
+        linesChanged: BUCKET_ESTIMATED_LINES[bucket],
+        createdAt: item.created_at,
+        mergedAt: item.created_at
+      });
+      return acc;
+    }, []);
 
   if (!summaries.length) {
-    throw new Error("No measurable PR size data found.");
+    throw new Error(
+      "No PR size labels found on recent PRs. This free mode requires size labels (like size-XS..size-XL)."
+    );
   }
 
   const buckets: Record<Bucket, number> = {
@@ -173,7 +167,9 @@ export async function runPullRequestAudit(username: string): Promise<AuditResult
   const totalPrs = summaries.length;
   const averageSize = Math.round(totalLines / totalPrs);
 
-  const tooBig = buckets.xl > buckets.xs + buckets.sm + buckets.md + buckets.lg;
+  const xlRatio = buckets.xl / totalPrs;
+  const largeRatio = (buckets.lg + buckets.xl) / totalPrs;
+  const tooBig = xlRatio >= 0.15 || largeRatio >= 0.4;
 
   const reason = tooBig
     ? "Your PRs read like a jump-scare novel. Split them up before your reviewers file a missing-person report."
