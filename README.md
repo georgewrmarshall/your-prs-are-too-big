@@ -17,13 +17,12 @@ Then open `http://localhost:3000`.
 - Enter a GitHub username.
 - The app fetches recent public PRs for that user via GitHub REST APIs.
 - Each PR is bucketed by changed lines (`additions + deletions`):
-  - `xs`: 1-50
-  - `sm`: 51-100
-  - `md`: 101-300
-  - `lg`: 301-500
-  - `xl`: 501-1000
-  - `xxl`: 1000+
-- The app flags `YOUR PRS ARE TOO BIG` when recent history skews large.
+  - `xs`: 1-10
+  - `sm`: 11-100
+  - `md`: 101-500
+  - `lg`: 501-1000
+  - `xl`: 1001+
+- The app flags `YOUR PRS ARE TOO BIG` when `xl > (xs + sm + md + lg)`.
 
 ## GitHub Pages
 

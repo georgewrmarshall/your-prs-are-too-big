@@ -1,4 +1,4 @@
-export type Bucket = "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
+export type Bucket = "xs" | "sm" | "md" | "lg" | "xl";
 
 export type PullRequestSummary = {
   title: string;
@@ -40,12 +40,11 @@ type PullRequestResponse = {
 };
 
 const BUCKET_RANGES: Record<Bucket, string> = {
-  xs: "1-50",
-  sm: "51-100",
-  md: "101-300",
-  lg: "301-500",
-  xl: "501-1000",
-  xxl: "1000+"
+  xs: "1-10",
+  sm: "11-100",
+  md: "101-500",
+  lg: "501-1000",
+  xl: "1001+"
 };
 
 export const bucketLabels: Record<Bucket, string> = {
@@ -53,17 +52,15 @@ export const bucketLabels: Record<Bucket, string> = {
   sm: `sm: ${BUCKET_RANGES.sm}`,
   md: `md: ${BUCKET_RANGES.md}`,
   lg: `lg: ${BUCKET_RANGES.lg}`,
-  xl: `xl: ${BUCKET_RANGES.xl}`,
-  xxl: `xxl: ${BUCKET_RANGES.xxl}`
+  xl: `xl: ${BUCKET_RANGES.xl}`
 };
 
 function bucketForSize(linesChanged: number): Bucket {
-  if (linesChanged <= 50) return "xs";
+  if (linesChanged <= 10) return "xs";
   if (linesChanged <= 100) return "sm";
-  if (linesChanged <= 300) return "md";
-  if (linesChanged <= 500) return "lg";
-  if (linesChanged <= 1000) return "xl";
-  return "xxl";
+  if (linesChanged <= 500) return "md";
+  if (linesChanged <= 1000) return "lg";
+  return "xl";
 }
 
 async function mapWithConcurrency<T, R>(
@@ -164,8 +161,7 @@ export async function runPullRequestAudit(username: string): Promise<AuditResult
     sm: 0,
     md: 0,
     lg: 0,
-    xl: 0,
-    xxl: 0
+    xl: 0
   };
 
   let totalLines = 0;
@@ -177,12 +173,7 @@ export async function runPullRequestAudit(username: string): Promise<AuditResult
   const totalPrs = summaries.length;
   const averageSize = Math.round(totalLines / totalPrs);
 
-  const largeCount = buckets.lg + buckets.xl + buckets.xxl;
-  const veryLargeCount = buckets.xl + buckets.xxl;
-  const largeRatio = largeCount / totalPrs;
-  const veryLargeRatio = veryLargeCount / totalPrs;
-
-  const tooBig = averageSize > 300 || veryLargeRatio >= 0.2 || largeRatio >= 0.4;
+  const tooBig = buckets.xl > buckets.xs + buckets.sm + buckets.md + buckets.lg;
 
   const reason = tooBig
     ? "Your PRs read like a jump-scare novel. Split them up before your reviewers file a missing-person report."

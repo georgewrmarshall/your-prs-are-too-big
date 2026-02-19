@@ -3,7 +3,7 @@
 import { FormEvent, useMemo, useState } from "react";
 import { bucketLabels, runPullRequestAudit, type AuditResult, type Bucket } from "@/lib/prAudit";
 
-const orderedBuckets: Bucket[] = ["xs", "sm", "md", "lg", "xl", "xxl"];
+const orderedBuckets: Bucket[] = ["xs", "sm", "md", "lg", "xl"];
 
 function prettyDate(isoDate: string): string {
   return new Date(isoDate).toLocaleDateString(undefined, {
