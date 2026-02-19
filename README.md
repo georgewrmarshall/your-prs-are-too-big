@@ -1,6 +1,6 @@
 # your-prs-are-too-big
 
-A tiny Next.js app that audits a GitHub user's recent public PR sizes.
+A tiny Next.js app that audits a GitHub user's recent public PR sizes in MetaMask repositories.
 
 ## Run locally (Yarn)
 
@@ -15,7 +15,7 @@ Then open `http://localhost:3000`.
 ## How it works
 
 - Enter a GitHub username.
-- The app fetches recent public PRs for that user via GitHub REST APIs.
+- The app fetches recent public PRs for that user in `MetaMask/*` repositories via GitHub REST APIs.
 - In free/no-login mode, PRs are bucketed using existing PR labels (`size-XS` to `size-XL`).
 - Buckets follow the MetaMask thresholds:
   - `xs`: 1-10

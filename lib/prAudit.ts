@@ -17,6 +17,7 @@ export type AuditResult = {
   prs: PullRequestSummary[];
   verdict: "good" | "too-big";
   reason: string;
+  scope: "metamask";
 };
 
 type SearchItem = {
@@ -102,7 +103,7 @@ export async function runPullRequestAudit(username: string): Promise<AuditResult
   }
 
   const searchUrl = new URL("https://api.github.com/search/issues");
-  searchUrl.searchParams.set("q", `author:${trimmed} type:pr is:public is:merged`);
+  searchUrl.searchParams.set("q", `author:${trimmed} org:MetaMask type:pr is:public is:merged`);
   searchUrl.searchParams.set("sort", "updated");
   searchUrl.searchParams.set("order", "desc");
   searchUrl.searchParams.set("per_page", "100");
@@ -124,9 +125,12 @@ export async function runPullRequestAudit(username: string): Promise<AuditResult
   }
 
   const searchData = (await searchResponse.json()) as { items: SearchItem[] };
-  const candidateItems = searchData.items.filter((item) => Boolean(item.pull_request?.url));
+  const candidateItems = searchData.items.filter((item) => {
+    if (!item.pull_request?.url) return false;
+    return item.repository_url.includes("/repos/MetaMask/");
+  });
   if (!candidateItems.length) {
-    throw new Error("No public PRs found for this username.");
+    throw new Error("No public merged PRs found for this user in MetaMask repositories.");
   }
 
   const summaries = candidateItems.reduce<PullRequestSummary[]>((acc, item) => {
@@ -182,6 +186,7 @@ export async function runPullRequestAudit(username: string): Promise<AuditResult
     buckets,
     prs: summaries,
     verdict: tooBig ? "too-big" : "good",
-    reason
+    reason,
+    scope: "metamask"
   };
 }
